@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analysis results - PatternLens ML</title>
+  <style>
+    :root { font-family: Inter, system-ui, sans-serif; color: #e5edf8; }
+    body { margin: 0; background: #101827; }
+    main { max-width: 1100px; margin: 0 auto; padding: 42px 24px; }
+    a { color: #8db5ff; } h1 { margin-bottom: 4px; }
+    .muted { color: #aebdd3; } .grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 16px; margin: 26px 0; }
+    .card { background: #17243a; border: 1px solid #2b3d5b; border-radius: 14px; padding: 20px; }
+    .value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    table { width: 100%; border-collapse: collapse; } th, td { padding: 10px; text-align: left; border-bottom: 1px solid #31435f; }
+    .section { margin-top: 26px; } .tag { color: #9ed8bd; }
+  </style>
+</head>
+<body>
+  <main>
+    <a href="{{ url_for('index') }}">← Analyze another dataset</a>
+    <h1>Analysis results</h1>
+    <p class="muted">{{ result.filename }} · {{ result.rows }} rows · {{ result.columns }} columns · <span class="tag">{{ result.task }}</span></p>
+    <div class="grid">
+      <div class="card"><div class="muted">Prediction target</div><div class="value">{{ result.target }}</div></div>
+      <div class="card"><div class="muted">Features used</div><div class="value">{{ result.features|length }}</div></div>
+      <div class="card"><div class="muted">Model</div><div class="value">Random Forest</div></div>
+      <div class="card"><div class="muted">Patterns</div><div class="value">{{ result.patterns.cluster_count if result.patterns else 0 }}</div></div>
+    </div>
+    <section class="card section">
+      <h2>Model evaluation</h2>
+      <table><tr><th>Metric</th><th>Value</th></tr>
+      {% for index in range(result.metrics.Metric|length) %}<tr><td>{{ result.metrics.Metric[index] }}</td><td>{{ result.metrics.Value[index] }}</td></tr>{% endfor %}
+      </table>
+    </section>
+    <section class="card section">
+      <h2>Discovered patterns</h2>
+      {% if result.patterns %}
+        <p class="muted">K-Means grouped records using {{ result.patterns.feature_count }} numeric features.</p>
+        <table><tr><th>Pattern</th><th>Records</th></tr>
+        {% for cluster in result.patterns.clusters %}<tr><td>{{ cluster.name }}</td><td>{{ cluster.records }}</td></tr>{% endfor %}
+        </table>
+      {% else %}<p class="muted">Not enough numeric features to discover clusters.</p>{% endif %}
+    </section>
+    <section class="card section">
+      <h2>Prediction preview</h2>
+      <table><tr><th>Actual</th><th>Predicted</th></tr>
+      {% for row in result.preview %}<tr><td>{{ row.Actual }}</td><td>{{ row.Predicted }}</td></tr>{% endfor %}
+      </table>
+    </section>
+  </main>
+</body>
+</html>
